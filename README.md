@@ -1,0 +1,1 @@
+A library for manipulating ff6 data.
