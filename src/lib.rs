@@ -1,4 +1,4 @@
-mod events;
+pub mod events;
 
 #[macro_use]
 extern crate nom;

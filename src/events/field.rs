@@ -47,9 +47,11 @@ pub enum Event {
     Call {
         addr: u32,
     },
+    /*
     ClearEventBit {
-        bit: u16,
+       bit: u16,
     },
+    */
     Dialog {
         msg: u16,
         wait: bool,
@@ -63,7 +65,7 @@ pub enum Event {
     },
     MakeChar0Lead,
     Nop,
-    Ret,
+
     UnfadeScreen,
 }
 
@@ -86,12 +88,6 @@ macro_rules! parse_action_queue {
                     len: info[0] & 0x7f
                 })
         )
-    };
-}
-
-macro_rules! parse_simple_event {
-    ($i:expr, $tag:expr, $t:expr) => {
-        map!($i, tag!(&[$tag as u8]), |_| $t)
     };
 }
 

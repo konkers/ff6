@@ -4,9 +4,12 @@ use std::error;
 use std::error::Error;
 use std::fmt;
 
+mod utils;
+
 mod action;
 mod field;
 mod world_char;
+
 
 #[derive(Debug)]
 pub enum Script {
