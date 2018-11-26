@@ -10,7 +10,6 @@ mod action;
 mod field;
 mod world_char;
 
-
 #[derive(Debug)]
 pub enum Script {
     FieldScript(field::Script),

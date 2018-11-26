@@ -52,11 +52,9 @@ enum Tag {
     LoadMap = 0xd2,
     LoadMap2 = 0xd3,
 
-
     // TODO:
     // D4 aaaaaa                           If ($08 & 0x80 == 0), goto $aaaaaa
     // D5 xx aaaaaa                        If ($F6 != xx), goto $aaaaaa
-
     UnfadeScreen = 0xd8,
     FadeScreen = 0xd9,
 
@@ -68,7 +66,6 @@ enum Tag {
     // ChangeToShipSprite = 0xfc,
     // ShowFigaroSubmerging = 0xfd,
     // ShowFigaroEmerging = 0xfe,
-
     End = 0xff,
 }
 
@@ -76,13 +73,13 @@ enum Tag {
 pub struct Condition {
     byte: u16,
     bit: u8,
-    is_set: bool
+    is_set: bool,
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum CondOp {
     Or,
-    And
+    And,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -112,23 +109,54 @@ pub enum Speed {
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Event {
-    ClrSetEventBit{set: bool, byte: u16, bit: u8},
-    ConditionalJump{ op: CondOp, conditions: Vec<Condition>, addr: u32},
-    EntitySpeed{speed: Speed},
+    ClrSetEventBit {
+        set: bool,
+        byte: u16,
+        bit: u8,
+    },
+    ConditionalJump {
+        op: CondOp,
+        conditions: Vec<Condition>,
+        addr: u32,
+    },
+    EntitySpeed {
+        speed: Speed,
+    },
     FadeScreen,
-    GraphicalAction { action: u8, flipped: bool },
+    GraphicalAction {
+        action: u8,
+        flipped: bool,
+    },
     HideCharacter,
     HideMiniMap,
     // TODO: there are flags in LoadMap we're not parsing.
-    LoadMap { map: u16, x: u8, y: u8, mode: u8, variant: u8 },
-    Move { dir: u8, steps: u8 }, // TODO: make dir an enum.
-    MoveDiag { dir: Diagonal, steps: [u8; 2] },
-    Pause { frames: u8 },
+    LoadMap {
+        map: u16,
+        x: u8,
+        y: u8,
+        mode: u8,
+        variant: u8,
+    },
+    Move {
+        dir: u8,
+        steps: u8,
+    }, // TODO: make dir an enum.
+    MoveDiag {
+        dir: Diagonal,
+        steps: [u8; 2],
+    },
+    Pause {
+        frames: u8,
+    },
     ShowCharacter,
     ShowMiniMap,
-    TurnCharacter {dir: Direction},
+    TurnCharacter {
+        dir: Direction,
+    },
     UnfadeScreen,
-    UnknownCmdC7{args: [u8; 2]},
+    UnknownCmdC7 {
+        args: [u8; 2],
+    },
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -139,7 +167,7 @@ pub struct Script {
 named!(parse_clear_set_event_bit<&[u8], Event>,
     do_parse!(
         op: parse_range!(Tag::SetEventBit, Tag::ClearEventBit) >>
-        v: le_u16 >> 
+        v: le_u16 >>
         (Event::ClrSetEventBit{set: op[0] == Tag::SetEventBit as u8, byte: v >> 3, bit: (v & 0x7) as u8})
     ));
 
@@ -151,11 +179,16 @@ named!(parse_condition<&[u8], Condition>,
 
 macro_rules! parse_conditional_jmp {
     ($i:expr, $tag:expr, $op:expr, $n:expr) => {
-        do_parse!($i,
-            tag!(&[$tag as u8]) >>
-            c: count!(parse_condition, $n) >>
-            addr: le_u24 >>
-            (Event::ConditionalJump{op: $op, conditions: c, addr: addr})
+        do_parse!(
+            $i,
+            tag!(&[$tag as u8])
+                >> c: count!(parse_condition, $n)
+                >> addr: le_u24
+                >> (Event::ConditionalJump {
+                    op: $op,
+                    conditions: c,
+                    addr: addr
+                })
         )
     };
 }
@@ -198,15 +231,15 @@ named!(parse_unknown_cmd_c7<&[u8], Event>,
     ));
 
 named!(pub parse_event<&[u8], Event>, alt!(
-    parse_simple_event!(Tag::SetEntitySpeedSlowest, 
+    parse_simple_event!(Tag::SetEntitySpeedSlowest,
         Event::EntitySpeed{speed: Speed::Slowest}) |
-    parse_simple_event!(Tag::SetEntitySpeedSlow, 
+    parse_simple_event!(Tag::SetEntitySpeedSlow,
         Event::EntitySpeed{speed: Speed::Slow}) |
-    parse_simple_event!(Tag::SetEntitySpeedNormal, 
+    parse_simple_event!(Tag::SetEntitySpeedNormal,
         Event::EntitySpeed{speed: Speed::Normal}) |
-    parse_simple_event!(Tag::SetEntitySpeedFast, 
+    parse_simple_event!(Tag::SetEntitySpeedFast,
         Event::EntitySpeed{speed: Speed::Fast}) |
-    parse_simple_event!(Tag::SetEntitySpeedFastest, 
+    parse_simple_event!(Tag::SetEntitySpeedFastest,
         Event::EntitySpeed{speed: Speed::Fastest}) |
 
     parse_simple_event!(Tag::FadeScreen, Event::FadeScreen) |
@@ -293,28 +326,40 @@ mod tests {
     #[test]
     fn simple_events_test() {
         assert_eq!(
-            Event::ClrSetEventBit{set: true, byte: 0x39, bit: 0x4},
-            parse_event(&[Tag::SetEventBit as u8, 0xcc, 0x01]).unwrap().1
+            Event::ClrSetEventBit {
+                set: true,
+                byte: 0x39,
+                bit: 0x4
+            },
+            parse_event(&[Tag::SetEventBit as u8, 0xcc, 0x01])
+                .unwrap()
+                .1
         );
 
         assert_eq!(
-            Event::EntitySpeed{speed: Speed::Slowest},
+            Event::EntitySpeed {
+                speed: Speed::Slowest
+            },
             parse_event(&[Tag::SetEntitySpeedSlowest as u8]).unwrap().1
         );
         assert_eq!(
-            Event::EntitySpeed{speed: Speed::Slow},
+            Event::EntitySpeed { speed: Speed::Slow },
             parse_event(&[Tag::SetEntitySpeedSlow as u8]).unwrap().1
         );
         assert_eq!(
-            Event::EntitySpeed{speed: Speed::Normal},
+            Event::EntitySpeed {
+                speed: Speed::Normal
+            },
             parse_event(&[Tag::SetEntitySpeedNormal as u8]).unwrap().1
         );
         assert_eq!(
-            Event::EntitySpeed{speed: Speed::Fast},
+            Event::EntitySpeed { speed: Speed::Fast },
             parse_event(&[Tag::SetEntitySpeedFast as u8]).unwrap().1
         );
         assert_eq!(
-            Event::EntitySpeed{speed: Speed::Fastest},
+            Event::EntitySpeed {
+                speed: Speed::Fastest
+            },
             parse_event(&[Tag::SetEntitySpeedFastest as u8]).unwrap().1
         );
 
@@ -334,20 +379,35 @@ mod tests {
         );
 
         assert_eq!(
-            Event::LoadMap{map: 0x603, x: 8, y: 8, mode: 0, variant: Tag::LoadMap as u8},
-            parse_event(&[Tag::LoadMap as u8, 0x03, 0x06, 0x08, 0x08, 0x00]).unwrap().1
+            Event::LoadMap {
+                map: 0x603,
+                x: 8,
+                y: 8,
+                mode: 0,
+                variant: Tag::LoadMap as u8
+            },
+            parse_event(&[Tag::LoadMap as u8, 0x03, 0x06, 0x08, 0x08, 0x00])
+                .unwrap()
+                .1
         );
 
         assert_eq!(
-            Event::LoadMap{map: 0x603, x: 8, y: 8, mode: 0, variant: Tag::LoadMap2 as u8},
-            parse_event(&[Tag::LoadMap2 as u8, 0x03, 0x06, 0x08, 0x08, 0x00]).unwrap().1
+            Event::LoadMap {
+                map: 0x603,
+                x: 8,
+                y: 8,
+                mode: 0,
+                variant: Tag::LoadMap2 as u8
+            },
+            parse_event(&[Tag::LoadMap2 as u8, 0x03, 0x06, 0x08, 0x08, 0x00])
+                .unwrap()
+                .1
         );
 
         assert_eq!(
             Event::HideCharacter,
             parse_event(&[Tag::HideCharacter as u8]).unwrap().1
         );
-
 
         assert_eq!(
             Event::Pause { frames: 10 },
@@ -370,17 +430,23 @@ mod tests {
         );
 
         assert_eq!(
-            Event::TurnCharacter { dir: Direction::Right },
+            Event::TurnCharacter {
+                dir: Direction::Right
+            },
             parse_event(&[Tag::TurnCharacterRight as u8]).unwrap().1
         );
 
         assert_eq!(
-            Event::TurnCharacter { dir: Direction::Down },
+            Event::TurnCharacter {
+                dir: Direction::Down
+            },
             parse_event(&[Tag::TurnCharacterDown as u8]).unwrap().1
         );
 
         assert_eq!(
-            Event::TurnCharacter { dir: Direction::Left },
+            Event::TurnCharacter {
+                dir: Direction::Left
+            },
             parse_event(&[Tag::TurnCharacterLeft as u8]).unwrap().1
         );
 
@@ -391,22 +457,55 @@ mod tests {
 
         assert_eq!(
             Event::UnknownCmdC7 { args: [0xaa, 0x55] },
-            parse_event(&[Tag::UnknownCmdC7 as u8, 0xaa, 0x55]).unwrap().1
+            parse_event(&[Tag::UnknownCmdC7 as u8, 0xaa, 0x55])
+                .unwrap()
+                .1
         );
     }
 
     #[test]
     fn conditional_jump_test() {
         let conditions = [
-                Condition{is_set: true, byte: 0x14, bit: 0x4},
-                Condition{is_set: false, byte: 0x82, bit: 0x2},
-                Condition{is_set: true, byte: 0x00, bit: 0x2},
-                Condition{is_set: true, byte: 0x82, bit: 0x0},
-
-                Condition{is_set: true, byte: 0x00, bit: 0x0},
-                Condition{is_set: false, byte: 0xfff, bit: 0x0},
-                Condition{is_set: false, byte: 0x00, bit: 0x7},
-                Condition{is_set: false, byte: 0x00, bit: 0x0},
+            Condition {
+                is_set: true,
+                byte: 0x14,
+                bit: 0x4,
+            },
+            Condition {
+                is_set: false,
+                byte: 0x82,
+                bit: 0x2,
+            },
+            Condition {
+                is_set: true,
+                byte: 0x00,
+                bit: 0x2,
+            },
+            Condition {
+                is_set: true,
+                byte: 0x82,
+                bit: 0x0,
+            },
+            Condition {
+                is_set: true,
+                byte: 0x00,
+                bit: 0x0,
+            },
+            Condition {
+                is_set: false,
+                byte: 0xfff,
+                bit: 0x0,
+            },
+            Condition {
+                is_set: false,
+                byte: 0x00,
+                bit: 0x7,
+            },
+            Condition {
+                is_set: false,
+                byte: 0x00,
+                bit: 0x0,
+            },
         ];
 
         let encoded = [
@@ -414,7 +513,6 @@ mod tests {
             [0x12, 0x04],
             [0x02, 0x80],
             [0x10, 0x84],
-
             [0x00, 0x80],
             [0xf8, 0x7f],
             [0x07, 0x00],
@@ -422,7 +520,7 @@ mod tests {
         ];
         for i in 0..8 {
             let mut c_vec = Vec::new();
-            let mut bytes = vec!(Tag::ConditionJumpAnd1 as u8 + i);
+            let mut bytes = vec![Tag::ConditionJumpAnd1 as u8 + i];
             for c in 0..=i {
                 c_vec.push(conditions[c as usize].clone());
             }
@@ -436,7 +534,7 @@ mod tests {
             bytes.push(0x12);
 
             assert_eq!(
-                Event::ConditionalJump { 
+                Event::ConditionalJump {
                     op: CondOp::And,
                     conditions: c_vec.clone(),
                     addr: 0x123456
@@ -444,9 +542,9 @@ mod tests {
                 parse_event(&bytes).unwrap().1
             );
 
-            bytes[0] =Tag::ConditionJumpOr1 as u8 + i;
+            bytes[0] = Tag::ConditionJumpOr1 as u8 + i;
             assert_eq!(
-                Event::ConditionalJump { 
+                Event::ConditionalJump {
                     op: CondOp::Or,
                     conditions: c_vec,
                     addr: 0x123456
