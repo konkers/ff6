@@ -5,6 +5,7 @@ authors = ["Erik Gilling <konkers@konkers.net>"]
 
 [dependencies]
 simple-error = "0.1.12"
+toml = "0.4"
 
 [dependencies.nom]
 version = "4.1.1"
