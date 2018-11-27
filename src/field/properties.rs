@@ -3,7 +3,7 @@ use std::error::Error;
 
 use rom_map;
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub enum BgDimension {
     Bg256,
     Bg512,
@@ -11,7 +11,7 @@ pub enum BgDimension {
     Bg2048,
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct Properties {
     name_index: u8,
     enable_x_zone: bool,

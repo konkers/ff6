@@ -2,7 +2,7 @@ use std::error::Error;
 
 pub mod properties;
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct Location {
     properties: properties::Properties,
 }
