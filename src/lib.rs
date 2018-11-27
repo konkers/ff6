@@ -1,5 +1,6 @@
 pub mod events;
 pub mod field;
+pub mod ptr_table;
 pub mod rom_map;
 
 #[macro_use]
