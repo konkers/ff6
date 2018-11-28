@@ -3,10 +3,19 @@ rust:
   - stable
   - beta
   - nightly
-matrix:
-  allow_failures:
-    - rust: nightly
-  fast_finish: true
 script:
   - cargo build --verbose --all
   - cargo test --verbose --all
+# - rustup install nightly
+# - cargo +nightly install --force rustfmt-nightly
+  - rustup component add rustfmt-preview
+  - cargo fmt --all -- --check
+matrix:
+  fast_finish: true
+#  include:
+#  - rust: nightly
+#    script:
+#    - cargo build --verbose --all
+#    - cargo test --verbose --all
+#    - rustup component add rustfmt-preview
+#    - cargo fmt --all -- --check
