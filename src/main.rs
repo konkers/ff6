@@ -23,8 +23,8 @@ impl Rom {
         let locations = field::parse(&self.data).unwrap();
         create_dir_all("out/field/").unwrap();
         for l in 0..locations.len() {
-            let t = ron::ser::to_string_pretty(&locations[l],
-            ron::ser::PrettyConfig::default()).unwrap();
+            let t = ron::ser::to_string_pretty(&locations[l], ron::ser::PrettyConfig::default())
+                .unwrap();
             write(format!("out/field/{:03x}.ron", l), t).unwrap();
         }
     }
