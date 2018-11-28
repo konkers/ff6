@@ -1,7 +1,6 @@
 extern crate ff6;
-extern crate toml;
+extern crate ron;
 
-use ff6::events;
 use ff6::field;
 use std::fs::File;
 use std::fs::{create_dir_all, write};
@@ -24,8 +23,9 @@ impl Rom {
         let locations = field::parse(&self.data).unwrap();
         create_dir_all("out/field/").unwrap();
         for l in 0..locations.len() {
-            let t = toml::to_string(&locations[l]).unwrap();
-            write(format!("out/field/{:03x}.toml", l), t).unwrap();
+            let t = ron::ser::to_string_pretty(&locations[l],
+            ron::ser::PrettyConfig::default()).unwrap();
+            write(format!("out/field/{:03x}.ron", l), t).unwrap();
         }
     }
 }
