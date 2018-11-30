@@ -2,6 +2,7 @@ pub mod events;
 pub mod field;
 pub mod ptr_table;
 pub mod rom_map;
+pub mod utils;
 
 #[macro_use]
 extern crate nom;

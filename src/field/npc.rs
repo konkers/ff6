@@ -3,6 +3,7 @@ use std::error::Error;
 
 use ptr_table;
 use rom_map;
+use utils::{get_u16, get_u24, test_bit};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct Npc {
@@ -26,19 +27,6 @@ pub struct Npc {
     start_direction: u8,       // ZD CE: f
     turn_when_triggered: bool, // ZD CE: dontFaceOnTrigger
     unknown_8_bits: u8,
-}
-
-fn get_u16(data: &[u8]) -> u32 {
-    (data[0] as u32) | ((data[1] as u32) << 1)
-}
-
-fn get_u24(data: &[u8]) -> u32 {
-    (data[0] as u32) | ((data[1] as u32) << 8) | ((data[2] as u32) << 16)
-}
-
-fn test_bit(data: u8, bit: u8) -> bool {
-    let mask = 1 << bit;
-    return (data & mask) == mask;
 }
 
 pub fn ptr_table(rom_data: &[u8]) -> Result<ptr_table::Table, Box<Error>> {
