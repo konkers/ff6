@@ -1,7 +1,26 @@
+use simple_error::SimpleError;
+use std::error::Error;
+
 #[derive(Debug, PartialEq)]
 pub struct Entry {
     pub addr: u32,
     pub len: usize,
+}
+impl Entry {
+    pub fn slice<'a>(&self, data: &'a [u8]) -> Result<&'a [u8], Box<Error>> {
+        let start = self.addr as usize;
+        let end = start + self.len;
+        if data.len() < end {
+            Err(SimpleError::new(format!(
+                "data needs to be at least {} bytes long.  Is {}.",
+                end,
+                data.len()
+            ))
+            .into())
+        } else {
+            Ok(&data[start..end])
+        }
+    }
 }
 
 #[derive(Debug, PartialEq)]

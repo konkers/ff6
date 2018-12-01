@@ -19,17 +19,11 @@ pub fn parse(rom_data: &[u8]) -> Result<Vec<Location>, Box<Error>> {
     for l in 0..0x19f {
         let properties = properties::parse(properties::data(l, &rom_data)?)?;
 
-        // TODO: this leaks the size of npc and trigger records.  PtrTable
-        // should be refactored to take a record length and keep record count
-        // in its entry.
         let npc_entry = &npc_table.entries[l];
-        let npcs = npc::parse_npcs(&rom_data[(npc_entry.addr as usize)..], npc_entry.len / 9)?;
+        let npcs = npc::parse_npcs(npc_entry.slice(&rom_data)?)?;
 
         let trigger_entry = &trigger_table.entries[l];
-        let triggers = trigger::parse_triggers(
-            &rom_data[(trigger_entry.addr as usize)..],
-            trigger_entry.len / 5,
-        )?;
+        let triggers = trigger::parse_triggers(trigger_entry.slice(&rom_data)?)?;
 
         locs.push(Location {
             properties: properties,

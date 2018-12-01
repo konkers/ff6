@@ -35,7 +35,8 @@ pub fn parse_trigger(data: &[u8]) -> Result<Trigger, Box<Error>> {
     })
 }
 
-pub fn parse_triggers(data: &[u8], num: usize) -> Result<Vec<Trigger>, Box<Error>> {
+pub fn parse_triggers(data: &[u8]) -> Result<Vec<Trigger>, Box<Error>> {
+    let num = data.len() / 5;
     let mut npcs = Vec::new();
     for i in 0..num {
         npcs.push(parse_trigger(&data[(i * 5)..])?);
@@ -63,6 +64,6 @@ mod tests {
             },
         ];
 
-        assert_eq!(triggers, parse_triggers(&data, 2).unwrap());
+        assert_eq!(triggers, parse_triggers(&data).unwrap());
     }
 }

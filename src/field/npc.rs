@@ -65,7 +65,8 @@ pub fn parse_npc(data: &[u8]) -> Result<Npc, Box<Error>> {
     })
 }
 
-pub fn parse_npcs(data: &[u8], num: usize) -> Result<Vec<Npc>, Box<Error>> {
+pub fn parse_npcs(data: &[u8]) -> Result<Vec<Npc>, Box<Error>> {
+    let num = data.len() / 9;
     let mut npcs = Vec::new();
     for i in 0..num {
         npcs.push(parse_npc(&data[(i * 9)..])?);
@@ -121,6 +122,6 @@ mod tests {
             0x77, 0xd2, 0x06, 0xc0, 0x40, 0x47, 0x36, 0x00, 0x02, 0xa7, 0xd2, 0x06, 0xc0, 0x08,
             0x66, 0x36, 0x00, 0x02,
         ];
-        assert_eq!(npcs, parse_npcs(&data, 2).unwrap());
+        assert_eq!(npcs, parse_npcs(&data).unwrap());
     }
 }
