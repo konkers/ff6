@@ -31,7 +31,7 @@ pub struct Npc {
 
 pub fn ptr_table(rom_data: &[u8]) -> Result<ptr_table::Table, Box<Error>> {
     // TODO bounds check rom data.
-    let addr = rom_map::snes_to_file(rom_map::NPC_POINTERS) as usize;
+    let addr = rom_map::snes_to_file(rom_map::NPC_POINTERS);
     let table = ptr_table::Table::new(
         &rom_data[addr..],
         0x1a0,

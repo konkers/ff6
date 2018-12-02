@@ -3,12 +3,12 @@ use std::error::Error;
 
 #[derive(Debug, PartialEq)]
 pub struct Entry {
-    pub addr: u32,
+    pub addr: usize,
     pub len: usize,
 }
 impl Entry {
     pub fn slice<'a>(&self, data: &'a [u8]) -> Result<&'a [u8], Box<Error>> {
-        let start = self.addr as usize;
+        let start = self.addr;
         let end = start + self.len;
         if data.len() < end {
             Err(SimpleError::new(format!(
@@ -33,7 +33,7 @@ fn decode_u16(data: &[u8]) -> u16 {
 }
 
 impl Table {
-    pub fn new(data: &[u8], entries: usize, offset: u32) -> Table {
+    pub fn new(data: &[u8], entries: usize, offset: usize) -> Table {
         let mut table = Table {
             entries: Vec::new(),
         };
@@ -43,7 +43,7 @@ impl Table {
             let next_addr = decode_u16(&data[(i + 1) * 2..]);
             let len = next_addr - addr;
             table.entries.push(Entry {
-                addr: offset + addr as u32,
+                addr: offset + addr as usize,
                 len: len as usize,
             });
         }
