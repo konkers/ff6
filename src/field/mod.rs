@@ -1,5 +1,8 @@
 use std::error::Error;
 
+use rom_map;
+use utils::get_u24;
+
 pub mod npc;
 pub mod properties;
 pub mod trigger;
@@ -7,6 +10,7 @@ pub mod trigger;
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct Location {
     properties: properties::Properties,
+    entrance_event_addr: u32,
     triggers: Vec<trigger::Trigger>,
     npcs: Vec<npc::Npc>,
 }
@@ -19,6 +23,9 @@ pub fn parse(rom_data: &[u8]) -> Result<Vec<Location>, Box<Error>> {
     for l in 0..0x19f {
         let properties = properties::parse(properties::data(l, &rom_data)?)?;
 
+        let entrance_table = rom_map::snes_to_file(rom_map::LOCATION_ENTRANCE_EVENTS) + l * 3;
+        let entrance_event = get_u24(&rom_data[entrance_table..]);
+
         let npc_entry = &npc_table.entries[l];
         let npcs = npc::parse_npcs(npc_entry.slice(&rom_data)?)?;
 
@@ -27,6 +34,7 @@ pub fn parse(rom_data: &[u8]) -> Result<Vec<Location>, Box<Error>> {
 
         locs.push(Location {
             properties: properties,
+            entrance_event_addr: entrance_event,
             triggers: triggers,
             npcs: npcs,
         });
